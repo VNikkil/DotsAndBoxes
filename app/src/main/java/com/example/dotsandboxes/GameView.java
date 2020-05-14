@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Random;
+import java.util.Vector;
 
 
 public class GameView extends View {
@@ -37,13 +38,17 @@ public class GameView extends View {
     private  Path pathU4 = new Path();
     private  Path path = new Path();
     private  Path TempPath = new Path();
+    private  Path Temp1Path = new Path();
+    private  Path TempCPath = new Path();
 
+    Vector<Float> PosX = new Vector<>();
+    Vector<Float> PosY = new Vector<>();
     int CurrUser = 1,PrevUser = 1;                                                     //1 - U1         2 - U2       3- U3          4-U4
     String CurrPlayer;
     int  Score1 = 0,Score2 = 0,Score3 = 0,Score4 = 0;
     boolean IsCompPlaying = false;
     int Difficulty = 0;
-    float PrevX = -1,PrevY= -1;
+    float PrevX = -1,PrevY= -1,Prev2X,Prev2Y;
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -134,7 +139,6 @@ public class GameView extends View {
     protected void onDraw(Canvas canvas) {
         Drawable d = getResources().getDrawable(R.drawable.undo, null);
         d.setBounds(width-100,230, width ,330);
-        if(!IsCompPlaying)
         d.draw(canvas);
         width  = getMeasuredWidth();
         height = getMeasuredHeight();
@@ -254,9 +258,14 @@ public class GameView extends View {
             case MotionEvent.ACTION_DOWN:
                 if(!(IsCompPlaying && CurrUser == 2))
                 SideCheck(pointX,pointY);
-                if(!IsCompPlaying)
+
+                if(!(IsCompPlaying))
                 Undo(pointX,pointY);
-                if(IsCompPlaying && CurrUser == 2)
+
+                if(IsCompPlaying)
+                    UndoComp(pointX,pointY);
+
+                if(IsCompPlaying && Difficulty == 1 && CurrUser== 2 )
                     ComputerTurn();
 
                   return true;
@@ -278,8 +287,22 @@ public class GameView extends View {
             square temp = Sqr.get(i);
 
             if (CheckRect(temp.Ax - Radius, temp.Ax + Radius, temp.Ay, temp.Dy, X, Y) && (! temp.LeftComp)) {
+
+                PosX.add(X);
+                PosY.add(Y);
+                if(CurrUser == 1) {
+                    Prev2X = X;
+                    Prev2Y = Y;
+                    Temp1Path = new Path();
+                    Temp1Path.addPath(pathU1);
+                    TempCPath = new Path();
+                    TempCPath.addPath(pathU2);
+                    PosX = new Vector<>();
+                    PosY = new Vector<>();
+                }
                 PrevX = X;
                 PrevY = Y;
+
                 Sqr.get(i).LeftComp = true;
                 Sqr.get(i).nSidesCompleted++;
                 if((i % (GridSide-1) != 0))
@@ -313,13 +336,24 @@ public class GameView extends View {
 
             if(CheckRect(temp.Ax,temp.Dx,temp.Ay - Radius ,temp.Ay + Radius ,X,Y) && (!temp.TopComp) )
             {
+                PosX.add(X);
+                PosY.add(Y);
+                if(CurrUser == 1) {
+                    Prev2X = X;
+                    Prev2Y = Y;
+                    Temp1Path = new Path();
+                    Temp1Path.addPath(pathU1);
+                    TempCPath = new Path();
+                    TempCPath.addPath(pathU2);
+                    PosX = new Vector<>();
+                    PosY = new Vector<>();
+                }
                 PrevX = X;
                 PrevY = Y;
                 Sqr.get(i).TopComp = true;
                 Sqr.get(i).nSidesCompleted++;
                 if(i >= GridSide -1)
                 {
-                    v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
                     Sqr.get(i - GridSide + 1).BottomComp = true;
                     Sqr.get(i - GridSide  +1).nSidesCompleted++;
                     if(CheckFinish(i- GridSide +1)){
@@ -348,9 +382,21 @@ public class GameView extends View {
 
             if( (i+1) %(GridSide - 1) == 0)
             {
+                PosX.add(X);
+                PosY.add(Y);
                 if(CheckRect(temp.Dx - Radius,temp.Dx + Radius,temp.Ay,temp.Dy,X,Y) && !(temp.RightComp))
                 {
-                    v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
+                    if(CurrUser == 1) {
+                        Prev2X = X;
+                        Prev2Y = Y;
+                        Temp1Path = new Path();
+                        Temp1Path.addPath(pathU1);
+                        TempCPath = new Path();
+                        TempCPath.addPath(pathU2);
+                        PosX = new Vector<>();
+                        PosY = new Vector<>();
+                    }
+
                     PrevX = X;
                     PrevY = Y;
                     temp.RightComp = true;
@@ -376,9 +422,20 @@ public class GameView extends View {
 
             if( i >= (GridSide - 2) * (GridSide -1))
             {
-                v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
+                PosX.add(X);
+                PosY.add(Y);
                 if(CheckRect(temp.Ax,temp.Dx,temp.Dy - Radius,temp.Dy+Radius,X,Y) && !(temp.BottomComp))
                 {
+                    if(CurrUser == 1) {
+                        Prev2X = X;
+                        Prev2Y = Y;
+                        Temp1Path = new Path();
+                        Temp1Path.addPath(pathU1);
+                        TempCPath = new Path();
+                        TempCPath.addPath(pathU2);
+                        PosX = new Vector<>();
+                        PosY = new Vector<>();
+                    }
                     PrevX = X;
                     PrevY = Y;
                     temp.BottomComp = true;
@@ -404,6 +461,8 @@ public class GameView extends View {
 
         }
 
+        if(IsCompPlaying && CurrUser == 2 && Difficulty == 0)
+            ComputerTurn();
 
 
     }
@@ -508,12 +567,15 @@ public class GameView extends View {
     }
 
     public void ComputerTurn(){
-        float X,Y;
+
 
         if(Difficulty == 1) {
-            Log.i("TAG","Difficult = " + Difficulty);
+
             for (int i = 0; i < Sqr.size(); i++) {
+
                 if (Sqr.get(i).nSidesCompleted == 3) {
+
+                    Log.i("TAG"," iNSIDE THE DIFFUICULTY");
                     if (!(Sqr.get(i).LeftComp))
                         SideCheck(Sqr.get(i).Ax, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
 
@@ -526,8 +588,9 @@ public class GameView extends View {
                 }
             }
         }
+        Log.i("TAG"," oUTSSIDE THE DIFFUICULTY");
         Random random = new Random();
-        int i = random.nextInt(Sqr.size());
+        int i = random.nextInt(Sqr.size()-1)+1;
         while(Sqr.get(i).isCompleted && i >= 0)
             i--;
 
@@ -595,6 +658,28 @@ public class GameView extends View {
                         pathU4.addPath(TempPath);
                         break;
             }
+
+        }
+    }
+
+    public void UndoComp(float X,float Y)
+    {
+        if(X < width && X > width-100 && Y < 330 && Y>230)
+        {
+            CurrUser = 1;
+
+
+            for(int i =0; i < PosX.size();i++)
+                SideUndo(PosX.get(PosX.size() -i -1),PosY.get(PosX.size()-i -1));
+
+            pathU2 = new Path();
+            pathU2.addPath(TempCPath);
+
+            SideUndo(Prev2X,Prev2Y);
+
+            pathU1 = new Path();
+            pathU1.addPath(Temp1Path);
+
 
         }
     }
