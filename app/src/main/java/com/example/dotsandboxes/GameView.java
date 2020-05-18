@@ -254,6 +254,8 @@ public class GameView extends View {
     }
 
 
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -275,8 +277,22 @@ public class GameView extends View {
                         ComputerTurn();
                 }
                   return true;
-            case MotionEvent.ACTION_MOVE:
-                // path.lineTo(pointX, pointY);
+
+            case MotionEvent.ACTION_UP:
+                if(!IsGameOver) {
+                    if (!(IsCompPlaying && CurrUser == 2))
+                        SideCheck(pointX, pointY);
+
+                    if (!(IsCompPlaying))
+                        Undo(pointX, pointY);
+
+                    if (IsCompPlaying)
+                        UndoComp(pointX, pointY);
+
+                    if (IsCompPlaying && Difficulty == 1 && CurrUser == 2)
+                        ComputerTurn();
+                }
+
                 break;
             default:
                 return false;
@@ -488,7 +504,7 @@ public class GameView extends View {
     {
         if(Sqr.get(i).nSidesCompleted > 3 && !(Sqr.get(i).isCompleted))
         {
-            v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+
             Sqr.get(i).isCompleted = true;
             path.moveTo(Sqr.get(i).Ax,Sqr.get(i).Ay);
             path.addRect(Sqr.get(i).Ax + Radius +10,Sqr.get(i).Ay + Radius + 10,Sqr.get(i).Dx - Radius - 10,Sqr.get(i).Dy - Radius - 10, Path.Direction.CW);
@@ -617,7 +633,9 @@ public class GameView extends View {
 
                     else
                         SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Dy);
-                } else {
+                }
+
+                else {
                     if (!(Sqr.get(i).TopComp))
                         SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Ay);
 
