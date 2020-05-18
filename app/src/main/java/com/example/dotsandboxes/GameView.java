@@ -133,6 +133,7 @@ public class GameView extends View {
     int Cy = Radius;
     int ArrCreate = 0;
     int nPlayers;
+    Boolean IsGameOver = false;
 
 
     @Override
@@ -187,6 +188,9 @@ public class GameView extends View {
                 canvas.drawText(CurrPlayer + "'s Turn",width/2,Cy + width+ 200,PaintCplayer);
             else
             {
+                IsGameOver = true;
+                CurrUser = -1;
+
                 v.vibrate(VibrationEffect.createOneShot(1200,250));
                     canvas.drawText("GAME OVER ",width/2 - 300,Cy + width+ 200,PaintCplayer);
                 if(!IsCompPlaying)
@@ -212,12 +216,12 @@ public class GameView extends View {
                     else
                         canvas.drawText("Computer WON!!! ",width/2 - 300,Cy + width+ 300,PaintU2);
                 }
-
+                IsCompPlaying = false;
             }
 
         canvas.drawText("Player 1 : " + Score1, 10,100,PaintU1);
         if(!IsCompPlaying)
-            canvas.drawText("Player 2 : " + Score2,width-400,100,PaintU2);
+            canvas.drawText("Player 2 : " + Score2,width-440,100,PaintU2);
         else
             canvas.drawText("Comp : " + Score2,width - 440,100,PaintU2);
         if(nPlayers > 2) {
@@ -226,7 +230,7 @@ public class GameView extends View {
 
             if (nPlayers > 3) {
                 canvas.drawPath(pathU4, PaintU4);
-                canvas.drawText("Player 4 : " + Score4, width - 400, height - 100, PaintU4);
+                canvas.drawText("Player 4 : " + Score4, width - 440, height - 100, PaintU4);
             }
        }
 
@@ -252,22 +256,24 @@ public class GameView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
         float pointX = event.getX();
         float pointY = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if(!(IsCompPlaying && CurrUser == 2))
-                SideCheck(pointX,pointY);
+                if(!IsGameOver) {
+                    if (!(IsCompPlaying && CurrUser == 2))
+                        SideCheck(pointX, pointY);
 
-                if(!(IsCompPlaying))
-                Undo(pointX,pointY);
+                    if (!(IsCompPlaying))
+                        Undo(pointX, pointY);
 
-                if(IsCompPlaying)
-                    UndoComp(pointX,pointY);
+                    if (IsCompPlaying)
+                        UndoComp(pointX, pointY);
 
-                if(IsCompPlaying && Difficulty == 1 && CurrUser== 2 )
-                    ComputerTurn();
-
+                    if (IsCompPlaying && Difficulty == 1 && CurrUser == 2)
+                        ComputerTurn();
+                }
                   return true;
             case MotionEvent.ACTION_MOVE:
                 // path.lineTo(pointX, pointY);
@@ -566,70 +572,67 @@ public class GameView extends View {
         }
     }
 
-    public void ComputerTurn(){
+    public void ComputerTurn() {
 
+        if (!IsGameOver) {
+            if (Difficulty == 1 && !IsGameOver) {
 
-        if(Difficulty == 1) {
+                for (int i = 0; i < Sqr.size(); i++) {
 
-            for (int i = 0; i < Sqr.size(); i++) {
+                    if (Sqr.get(i).nSidesCompleted == 3) {
 
-                if (Sqr.get(i).nSidesCompleted == 3) {
+                        Log.i("TAG", " iNSIDE THE DIFFUICULTY");
+                        if (!(Sqr.get(i).LeftComp))
+                            SideCheck(Sqr.get(i).Ax, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
 
-                    Log.i("TAG"," iNSIDE THE DIFFUICULTY");
+                        else if (!(Sqr.get(i).TopComp))
+                            SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Ay);
+                        else if (!(Sqr.get(i).RightComp))
+                            SideCheck(Sqr.get(i).Dx, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
+                        else
+                            SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Dy);
+                    }
+                }
+            }
+            if(!IsGameOver) {
+                Log.i("TAG", " OUTSSIDE THE DIFFUICULTY");
+                Random random = new Random();
+                int i = random.nextInt(Sqr.size() - 1) + 1;
+                while (Sqr.get(i).isCompleted && i > 0)
+                    i--;
+
+                if (Sqr.get(i).isCompleted) {
+                    while (Sqr.get(i).isCompleted && i < Sqr.size()-1)
+                        i++;
+                }
+                if (random.nextBoolean()) {
                     if (!(Sqr.get(i).LeftComp))
                         SideCheck(Sqr.get(i).Ax, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
 
-                    else if (!(Sqr.get(i).TopComp))
-                        SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Ay);
                     else if (!(Sqr.get(i).RightComp))
                         SideCheck(Sqr.get(i).Dx, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
+
+                    else if (!(Sqr.get(i).TopComp))
+                        SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Ay);
+
                     else
                         SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Dy);
+                } else {
+                    if (!(Sqr.get(i).TopComp))
+                        SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Ay);
+
+                    else if (!(Sqr.get(i).BottomComp))
+                        SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Dy);
+
+                    else if (!(Sqr.get(i).RightComp))
+                        SideCheck(Sqr.get(i).Dx, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
+
+                    else
+                        SideCheck(Sqr.get(i).Ax, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
+
                 }
             }
         }
-        Log.i("TAG"," oUTSSIDE THE DIFFUICULTY");
-        Random random = new Random();
-        int i = random.nextInt(Sqr.size()-1)+1;
-        while(Sqr.get(i).isCompleted && i >= 0)
-            i--;
-
-        if(Sqr.get(i).isCompleted)
-        {
-            while(Sqr.get(i).isCompleted && i <Sqr.size())
-                i++;
-        }
-        if(random.nextBoolean())
-        {
-            if(!(Sqr.get(i).LeftComp))
-                SideCheck(Sqr.get(i).Ax,(Sqr.get(i).Ay +Sqr.get(i).Dy)/2);
-
-            else if(!(Sqr.get(i).RightComp))
-                SideCheck(Sqr.get(i).Dx,(Sqr.get(i).Ay +Sqr.get(i).Dy)/2);
-
-            else if (!(Sqr.get(i).TopComp))
-                SideCheck((Sqr.get(i).Ax +Sqr.get(i).Dx)/2,Sqr.get(i).Ay);
-
-            else
-                SideCheck((Sqr.get(i).Ax +Sqr.get(i).Dx)/2,Sqr.get(i).Dy);
-        }
-
-        else
-        {
-            if (!(Sqr.get(i).TopComp))
-                SideCheck((Sqr.get(i).Ax +Sqr.get(i).Dx)/2,Sqr.get(i).Ay);
-
-            else if(!(Sqr.get(i).BottomComp))
-                SideCheck((Sqr.get(i).Ax +Sqr.get(i).Dx)/2,Sqr.get(i).Dy);
-
-            else if(!(Sqr.get(i).RightComp))
-                SideCheck(Sqr.get(i).Dx,(Sqr.get(i).Ay +Sqr.get(i).Dy)/2);
-
-            else
-                SideCheck(Sqr.get(i).Ax,(Sqr.get(i).Ay +Sqr.get(i).Dy)/2);
-
-        }
-
     }
 
 
@@ -666,15 +669,15 @@ public class GameView extends View {
     {
         if(X < width && X > width-100 && Y < 330 && Y>230)
         {
-            CurrUser = 1;
 
 
+            CurrUser=2;
             for(int i =0; i < PosX.size();i++)
                 SideUndo(PosX.get(PosX.size() -i -1),PosY.get(PosX.size()-i -1));
 
             pathU2 = new Path();
             pathU2.addPath(TempCPath);
-
+            CurrUser = 1;
             SideUndo(Prev2X,Prev2Y);
 
             pathU1 = new Path();
@@ -687,6 +690,7 @@ public class GameView extends View {
 
     public void SideUndo(float X,float Y)
     {
+
         int i =0;
         for(; i < Sqr.size() ; i++) {
             square temp = Sqr.get(i);
