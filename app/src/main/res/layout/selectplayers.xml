@@ -64,7 +64,6 @@
             android:layout_marginTop="166dp"
             android:layout_marginEnd="97dp"
             android:background="#FD08D0"
-            android:fontFamily="cursive"
             android:text="PLAYERS"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"

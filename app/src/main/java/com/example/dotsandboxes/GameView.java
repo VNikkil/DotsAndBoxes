@@ -26,7 +26,6 @@ import java.util.Vector;
 
 public class GameView extends View {
     Vibrator v;
-
     // setup initial color
     private final int paintColor = Color.BLACK;
     // defines paint and canvas
@@ -43,6 +42,9 @@ public class GameView extends View {
 
     Vector<Float> PosX = new Vector<>();
     Vector<Float> PosY = new Vector<>();
+    Vector<Integer> pos = new Vector<>();
+
+
     int CurrUser = 1,PrevUser = 1;                                                     //1 - U1         2 - U2       3- U3          4-U4
     String CurrPlayer;
     int  Score1 = 0,Score2 = 0,Score3 = 0,Score4 = 0;
@@ -56,8 +58,12 @@ public class GameView extends View {
         setFocusable(true);
         setFocusableInTouchMode(true);
         setupPaint();
-
     }
+
+
+
+
+
 
     /* A--,
        |  |
@@ -126,7 +132,7 @@ public class GameView extends View {
 
     int width  = getMeasuredWidth();
     int height = getMeasuredHeight();
-    int GridSide ;
+    int GridSide;
     int Radius =  Math.round(width/((3*GridSide - 2)*2)) ;
     int Gap = 6*Radius;
     int Cx = Radius;
@@ -135,123 +141,123 @@ public class GameView extends View {
     int nPlayers;
     Boolean IsGameOver = false;
 
-
+    int x=0;
     @Override
     protected void onDraw(Canvas canvas) {
         Drawable d = getResources().getDrawable(R.drawable.undo, null);
-        d.setBounds(width-100,230, width ,330);
+        d.setBounds(width - 100, 230, width, 330);
         d.draw(canvas);
-        width  = getMeasuredWidth();
+        width = getMeasuredWidth();
         height = getMeasuredHeight();
-        GridSide = (int) getTag() % 10 ;
-        nPlayers = ((int) getTag() - GridSide)/10;
-        Log.i("TAG"," players = " + nPlayers);
-        if(nPlayers > 4)
-            {
+        GridSide = (int) getTag() % 10;
+        Log.i("TAG","GS: "+ GridSide);
+        nPlayers = ((int) getTag() - GridSide) / 10;
+        if (nPlayers > 4) {
 
-               if(nPlayers == 5)
-                Difficulty =0;
+            if (nPlayers == 5)
+                Difficulty = 0;
 
-                else if(nPlayers == 6)
-                    Difficulty = 1;
+            else if (nPlayers == 6)
+                Difficulty = 1;
 
-                nPlayers = 2;
-                IsCompPlaying = true;
-            }
+            nPlayers = 2;
+            IsCompPlaying = true;
+        }
 
-        Log.i("TAG"," on creation Difficult = " + Difficulty);
-        Radius =  Math.round(width/((3*GridSide - 2)*2)) ;
-        Gap = 6*Radius;
+        Log.i("TAG", " on creation Difficult = " + Difficulty);
+        Radius = Math.round(width / ((3 * GridSide - 2) * 2));
+        Gap = 6 * Radius;
         Cx = Radius;
-        Cy = 400+Radius;
+        Cy = 400 + Radius;
 
         canvas.drawPath(pathU1, PaintU1);
         canvas.drawPath(pathU2, PaintU2);
 
-            switch (CurrUser){
-                case 1: CurrPlayer = "Player 1";
-                        break;
-                case 2:
-                        if(!IsCompPlaying)
-                            CurrPlayer = "Player 2";
-                        else
-                            CurrPlayer = "Computer";
-                        break;
-                case 3: CurrPlayer = "Player 3";
-                         break;
-                case 4: CurrPlayer = "Player 4";
-                    break;
-
-            }
-
-            if((Score1 + Score2 + Score3 + Score4 )!= (GridSide-1)*(GridSide-1) )
-                canvas.drawText(CurrPlayer + "'s Turn",width/2,Cy + width+ 200,PaintCplayer);
-            else
-            {
-                IsGameOver = true;
-                CurrUser = -1;
-
-                v.vibrate(VibrationEffect.createOneShot(1200,250));
-                    canvas.drawText("GAME OVER ",width/2 - 300,Cy + width+ 200,PaintCplayer);
-                if(!IsCompPlaying)
-                {
-                    if(Score1 > Score2 && Score1 > Score3 && Score1>Score4)
-                        canvas.drawText("Player 1 WON!!!",width/2 -300,Cy + width+ 300,PaintU1);
-                    else if(Score2 > Score1 && Score2 > Score3 && Score2>Score4)
-                        canvas.drawText("Player 2 WON!!!",width/2 -300,Cy + width+ 300,PaintU2);
-                    else if(Score3 > Score1 && Score3 > Score2 && Score3>Score1)
-                        canvas.drawText("Player 3 WON!!!",width/2 -300,Cy + width+ 300,PaintU3);
-                    else if(Score4 > Score1 && Score4 > Score2 && Score4 >Score3)
-                        canvas.drawText("Player 4 WON!!!",width/2 - 300,Cy + width+300,PaintU4);
-                    else
-                        canvas.drawText("DRAW ",width/2 - 300,Cy + width+ 300,PaintCplayer);
-                }
-
+        switch (CurrUser) {
+            case 1:
+                CurrPlayer = "Player 1";
+                break;
+            case 2:
+                if (!IsCompPlaying)
+                    CurrPlayer = "Player 2";
                 else
-                {
-                    if(Score1 > Score2)
-                        canvas.drawText("Player 1 WON!!!",width/2 -300,Cy + width+ 300,PaintU1);
-                    else if(Score1 == Score2)
-                        canvas.drawText("DRAW ",width/2 - 300,Cy + width+ 300,PaintCplayer);
-                    else
-                        canvas.drawText("Computer WON!!! ",width/2 - 300,Cy + width+ 300,PaintU2);
-                }
-                IsCompPlaying = false;
-            }
+                    CurrPlayer = "Computer";
+                break;
+            case 3:
+                CurrPlayer = "Player 3";
+                break;
+            case 4:
+                CurrPlayer = "Player 4";
+                break;
 
-        canvas.drawText("Player 1 : " + Score1, 10,100,PaintU1);
-        if(!IsCompPlaying)
-            canvas.drawText("Player 2 : " + Score2,width-440,100,PaintU2);
+        }
+
+        if ((Score1 + Score2 + Score3 + Score4) != (GridSide - 1) * (GridSide - 1))
+            canvas.drawText(CurrPlayer + "'s Turn", width / 2, Cy + width + 200, PaintCplayer);
+        else {
+            IsGameOver = true;
+            CurrUser = -1;
+
+            v.vibrate(VibrationEffect.createOneShot(1200, 250));
+            canvas.drawText("GAME OVER ", width / 2 - 300, Cy + width + 200, PaintCplayer);
+            if (!IsCompPlaying) {
+                if (Score1 > Score2 && Score1 > Score3 && Score1 > Score4)
+                    canvas.drawText("Player 1 WON!!!", width / 2 - 300, Cy + width + 300, PaintU1);
+                else if (Score2 > Score1 && Score2 > Score3 && Score2 > Score4)
+                    canvas.drawText("Player 2 WON!!!", width / 2 - 300, Cy + width + 300, PaintU2);
+                else if (Score3 > Score1 && Score3 > Score2 && Score3 > Score1)
+                    canvas.drawText("Player 3 WON!!!", width / 2 - 300, Cy + width + 300, PaintU3);
+                else if (Score4 > Score1 && Score4 > Score2 && Score4 > Score3)
+                    canvas.drawText("Player 4 WON!!!", width / 2 - 300, Cy + width + 300, PaintU4);
+                else
+                    canvas.drawText("DRAW ", width / 2 - 300, Cy + width + 300, PaintCplayer);
+            } else {
+                if (Score1 > Score2)
+                    canvas.drawText("Player 1 WON!!!", width / 2 - 300, Cy + width + 300, PaintU1);
+                else if (Score1 == Score2)
+                    canvas.drawText("DRAW ", width / 2 - 300, Cy + width + 300, PaintCplayer);
+                else
+                    canvas.drawText("Computer WON!!! ", width / 2 - 300, Cy + width + 300, PaintU2);
+            }
+            IsCompPlaying = false;
+        }
+
+        canvas.drawText("Player 1 : " + Score1, 10, 100, PaintU1);
+        if (!IsCompPlaying)
+            canvas.drawText("Player 2 : " + Score2, width - 440, 100, PaintU2);
         else
-            canvas.drawText("Comp : " + Score2,width - 440,100,PaintU2);
-        if(nPlayers > 2) {
+            canvas.drawText("Comp : " + Score2, width - 440, 100, PaintU2);
+        if (nPlayers > 2) {
             canvas.drawPath(pathU3, PaintU3);
-            canvas.drawText("Player 3 : " + Score3,10,height - 100,PaintU3);
+            canvas.drawText("Player 3 : " + Score3, 10, height - 100, PaintU3);
 
             if (nPlayers > 3) {
                 canvas.drawPath(pathU4, PaintU4);
                 canvas.drawText("Player 4 : " + Score4, width - 440, height - 100, PaintU4);
             }
-       }
+        }
 
-                for(int i = 0; i < GridSide ; i++,Cy += Gap)
-                {
-                    Cx = Radius;
-                    for(int j =0 ; j < GridSide ;j++,Cx += Gap)
-                    {
-                        canvas.drawCircle( Cx,Cy,Radius+10, drawPaint);
-                        if(ArrCreate == 0)
-                            if(i!= GridSide-1 && j!= GridSide-1)
-                                Sqr.add(new square( Cx, Cy,Cx+Gap,Cy + Gap));
+
+        for(int i = 0; i < GridSide ; i++,Cy += Gap)
+        {
+            Cx = Radius;
+            for(int j =0 ; j < GridSide ;j++,Cx += Gap)
+            {
+                canvas.drawCircle( Cx,Cy,Radius+10, drawPaint);
+                if(ArrCreate == 0)
+                    if(i!= GridSide-1 && j!= GridSide-1) {
+                        Sqr.add(new square(Cx, Cy, Cx + Gap, Cy + Gap));
+                        pos.add(x);
+                        x++;
                     }
+            }
+        }
 
-                }
 
+            ArrCreate = 1;
+            //canvas.drawPath(path,PaintU4);
 
-        ArrCreate = 1;
-        //canvas.drawPath(path,PaintU4);
-
-    }
+        }
 
 
 
@@ -483,7 +489,10 @@ public class GameView extends View {
 
         }
 
-        if(IsCompPlaying && CurrUser == 2 && Difficulty == 0)
+        if ((Score1 + Score2 + Score3 + Score4) == (GridSide - 1) * (GridSide - 1))
+            IsGameOver = true;
+
+        if(IsCompPlaying && CurrUser == 2 && Difficulty == 0 && !IsGameOver)
             ComputerTurn();
 
 
@@ -589,7 +598,7 @@ public class GameView extends View {
     }
 
     public void ComputerTurn() {
-
+        Log.i("TAG"," pos = " + pos);
         if (!IsGameOver) {
             if (Difficulty == 1 && !IsGameOver) {
 
@@ -607,20 +616,18 @@ public class GameView extends View {
                             SideCheck(Sqr.get(i).Dx, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
                         else
                             SideCheck((Sqr.get(i).Ax + Sqr.get(i).Dx) / 2, Sqr.get(i).Dy);
+
+                        pos.removeElement(i);
                     }
                 }
             }
             if(!IsGameOver) {
-                Log.i("TAG", " OUTSSIDE THE DIFFUICULTY");
-                Random random = new Random();
-                int i = random.nextInt(Sqr.size() - 1) + 1;
-                while (Sqr.get(i).isCompleted && i > 0)
-                    i--;
 
-                if (Sqr.get(i).isCompleted) {
-                    while (Sqr.get(i).isCompleted && i < Sqr.size()-1)
-                        i++;
-                }
+                Random random = new Random();
+                int j = random.nextInt(pos.size());
+               // Log.i("TAG"," " +i);
+                int i = pos.get(j);
+
                 if (random.nextBoolean()) {
                     if (!(Sqr.get(i).LeftComp))
                         SideCheck(Sqr.get(i).Ax, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
@@ -649,6 +656,9 @@ public class GameView extends View {
                         SideCheck(Sqr.get(i).Ax, (Sqr.get(i).Ay + Sqr.get(i).Dy) / 2);
 
                 }
+
+                if(Sqr.get(i).isCompleted)
+                    pos.removeElement(i);
             }
         }
     }
